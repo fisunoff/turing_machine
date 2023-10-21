@@ -1,7 +1,6 @@
 import sys
-import time
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.Qt import *
 
 from calc import Tape
