@@ -46,7 +46,34 @@ class Tape:
                 statement = elem[0]
                 command_symbol = self.command_symbols[pos]
                 if statement:
-                    new_state, symbol_to_replace, delta = map(str, statement.split(' '))
+                    info = list(map(str, statement.split(' ')))
+                    delta = 0
+                    new_state = start_state
+                    symbol_to_replace = command_symbol
+                    if len(info) == 3:
+                        new_state, symbol_to_replace, delta = map(str, statement.split(' '))
+
+                    # region частичное задание
+
+                    if len(info) == 2:
+                        if info[0][0] == 'q':
+                            new_state = info[0]
+                        else:
+                            symbol_to_replace = info[0]
+                        if info[1] in ['L', 'R', 'E', '-1', '1', '0', 'l', 'r', 'e']:
+                            delta = info[1]
+                        else:
+                            symbol_to_replace = info[1]
+
+                    if len(info) == 1:
+                        if info[0][0] == 'q':
+                            new_state = info[0]
+                        elif info[0] in ['L', 'R', 'E', '-1', '1', '0', 'l', 'r', 'e']:
+                            delta = info[0]
+                        else:
+                            symbol_to_replace = info[0]
+                    # endregion частичное задание
+
                     if delta.isdigit():
                         delta = int(delta)
                     else:
@@ -84,6 +111,8 @@ class Tape:
         elif self.state.index == len(self.state.tape) - 1 and delta == 1:
             self.state.tape = self.state.tape + ['a', ]
             self.state.index += 1
+        elif self.state.index == len(self.state.tape) - 1:
+            self.state.tape = self.state.tape + ['a', ]
         else:
             self.state.index += delta
         self.state.arrow = ' ' * self.state.index + '↓'

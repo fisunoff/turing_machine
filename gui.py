@@ -1,43 +1,49 @@
+import copy
 import sys
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import *
 
 from calc import Tape
 
 
 class TableModel(QAbstractTableModel):
+    HEIGHT = 12
+    WEIGHT = 12
+
     def __init__(self, parent=None):
         super(TableModel, self).__init__(parent)
 
-        self.tasks = [[['', False] for j in range(10)] for i in range(12)]  # +++
-        self.tasks[0][0] = ['Символ', False]
+        self.commands = [[['', False] for j in range(self.WEIGHT)] for i in range(self.HEIGHT)]
+        self.commands[0][0] = ['Символ', False]
 
     def rowCount(self, parent=None, *args, **kwargs):
-        return len(self.tasks)
+        return len(self.commands)
 
     def columnCount(self, parent=None, *args, **kwargs):
-        return 10
+        return self.WEIGHT
 
     def headerData(self, section, orientation, role=None):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
-                return ["Позиция", "", "", "", "", "", "", "", "", ""][section]
+                columns = ["Позиция", ]
+                columns.extend(["" for _ in range(self.WEIGHT - 1)])
+                return columns[section]
 
     def data(self, index, role):
         if index.isValid():
-            data, changed = self.tasks[index.row()][index.column()]
+            data, changed = self.commands[index.row()][index.column()]
 
             if role in [Qt.DisplayRole, Qt.EditRole]:
                 return data
 
-    def setData(self, index, value, role):  # !!!
+    def setData(self, index, value, role):
         if role == Qt.EditRole:
-            self.tasks[index.row()][index.column()] = [value, True]
+            self.commands[index.row()][index.column()] = [value, True]
             return True
         return False
 
-    def flags(self, index):  # !!!
+    def flags(self, index):
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
 
@@ -93,23 +99,36 @@ class MainWindow(QMainWindow):
         self.button_auto.move(800, 450)
         self.button_auto.clicked.connect(self.make_graph)
 
+        self.button_export = QPushButton('Экспорт', self)
+        self.button_export.move(900, 450)
+        self.button_export.clicked.connect(self.show_export_dialog)
+
+        self.button_import = QPushButton('Импорт', self)
+        self.button_import.move(1000, 450)
+        self.button_import.clicked.connect(self.show_import_dialog)
+
         self.arrow = QLabel(self)
         self.arrow.move(500, 395)
-        self.arrow.resize(280, 30)
+        self.arrow.resize(600, 30)
         self.arrow.setText('Указатель')
         self.arrow.setFont(QFont('Consolas', 24))
 
         self.tape = QLabel(self)
         self.tape.move(500, 420)
-        self.tape.resize(280, 30)
+        self.tape.resize(600, 30)
         self.tape.setText('Строка')
         self.tape.setFont(QFont('Consolas', 24))
+
+    def show_message(self, message: str):
+        dlg = QDialog(self)
+        dlg.setWindowTitle(message)
+        dlg.exec()
 
     @pyqtSlot()
     def on_click(self):
         textboxValue = self.textbox.text()
         index = int(self.textbox_index.text())
-        self.tape_cls = Tape(textboxValue, self.model.tasks, index)
+        self.tape_cls = Tape(textboxValue, self.model.commands, index)
         self.tape.setText(''.join(self.tape_cls.state.tape))
         self.arrow.setText(self.tape_cls.state.arrow)
 
@@ -126,7 +145,7 @@ class MainWindow(QMainWindow):
         while c < 1000 and not self.tape_cls.state.end:
             self.next_position()
             loop = QEventLoop()
-            QTimer.singleShot(1000, loop.quit)
+            QTimer.singleShot(200, loop.quit)
             loop.exec_()
             c += 1
 
@@ -134,10 +153,45 @@ class MainWindow(QMainWindow):
     def make_graph(self):
         self.tape_cls.draw_graph()
 
+    def make_export(self, filename: str):
+        try:
+            with open(f"{filename}", "w") as f:
+                for row in self.model.commands:
+                    f.write(";".join((i[0] for i in row)) + "\n")
+        except Exception as e:
+            self.show_message(f"Ошибка при экспорте: {e}")
+
+    def make_import(self, filename: str):
+        commands = copy.deepcopy(self.model.commands)
+        try:
+            with open(f"{filename}") as f:
+                for row_index in range(self.model.HEIGHT):
+                    row = f.readline().split(';')
+                    for elem_index in range(self.model.WEIGHT):
+                        commands[row_index][elem_index][0] = row[elem_index].strip()
+        except Exception as e:
+            self.show_message(f"Ошибка при импорте: {e}")
+        self.model.commands = commands
+
+    @pyqtSlot()
+    def show_export_dialog(self):
+        fname = QtWidgets.QFileDialog.getSaveFileName(self)[0]
+        if fname:
+            file_name = fname
+            self.make_export(file_name)
+
+    @pyqtSlot()
+    def show_import_dialog(self):
+        fname = QtWidgets.QFileDialog.getOpenFileName(self)[0]
+        if fname:
+            file_name = fname
+            self.make_import(file_name)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mw = MainWindow()
-    mw.resize(930, 500)
+    mw.resize(1120, 500)
+    mw.setWindowTitle('Машина Тьюринга')
     mw.show()
     sys.exit(app.exec_())
