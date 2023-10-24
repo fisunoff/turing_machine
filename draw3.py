@@ -6,7 +6,7 @@ from pyvis.network import Network
 def draw(n: int, data: list[list]):
     net = Network(directed=True)
     nodes = set()
-    edges = list()
+    edges = dict()
     for i in range(n):
         start_state, position, new_state, symbol_to_replace, delta = map(str, data[i])
         delta = int(delta)
@@ -19,13 +19,20 @@ def draw(n: int, data: list[list]):
                 delta = ''
         nodes.add(start_state)
         nodes.add(new_state)
-        edges.append([start_state, new_state, position, symbol_to_replace, delta])
-
+        key = (start_state, new_state)
+        if key in edges:
+            if start_state != new_state:
+                edges[key].append(f"{position}->{symbol_to_replace} {delta}")
+            else:
+                edges[key][0] = edges[key][0] + f"\n{position}->{symbol_to_replace} {delta}"
+        else:
+            edges[key] = [f"{position}->{symbol_to_replace} {delta}", ]
     for i in nodes:
         net.add_node(i, label=i)
 
-    for i in edges:
-        net.add_edge(i[0], i[1], label=f"{i[2]}->{i[3]} {i[4]}")
+    for key in edges:
+        for edge in edges[key]:
+            net.add_edge(key[0], key[1], label=f"{edge}")
 
     c = net.generate_html()
     f = open('list.html', 'w')
