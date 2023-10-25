@@ -3,6 +3,18 @@ import pathlib
 from pyvis.network import Network
 
 
+def make_indexes(x: str) -> str:
+    """
+    Заменяет числа в строке на "подстрочные знаки"
+    :param x: Исходная строка
+    :return:
+    """
+    normal = "0123456789"
+    sub_s = "₀₁₂₃₄₅₆₇₈₉"
+    res = x.maketrans(''.join(normal), ''.join(sub_s))
+    return x.translate(res)
+
+
 def draw(n: int, data: list[list]):
     net = Network(directed=True)
     nodes = set()
@@ -29,9 +41,13 @@ def draw(n: int, data: list[list]):
             edges[key] = [f"{position}→{symbol_to_replace} {delta}", ]
     for i in nodes:
         if i == 'q0':
-            net.add_node(i, label=i, color='#3cb371', shape='circle')
+            net.add_node(i, label=make_indexes(i), color='#3cb371', shape='circle', font_size=500)
         else:
-            net.add_node(i, label=i, shape='circle')
+            net.add_node(i, label=make_indexes(i), shape='circle', size=100)
+
+    for n in net.nodes:
+        n["size"] = 30
+        n["font"] = {"size": 30}
 
     for key in edges:
         for edge in edges[key]:
