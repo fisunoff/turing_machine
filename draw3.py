@@ -22,13 +22,16 @@ def draw(n: int, data: list[list]):
         key = (start_state, new_state)
         if key in edges:
             if start_state != new_state:
-                edges[key].append(f"{position}->{symbol_to_replace} {delta}")
+                edges[key].append(f"{position}→{symbol_to_replace} {delta}")
             else:
-                edges[key][0] = edges[key][0] + f"\n{position}->{symbol_to_replace} {delta}"
+                edges[key][0] = edges[key][0] + f"\n{position}→{symbol_to_replace} {delta}"
         else:
-            edges[key] = [f"{position}->{symbol_to_replace} {delta}", ]
+            edges[key] = [f"{position}→{symbol_to_replace} {delta}", ]
     for i in nodes:
-        net.add_node(i, label=i)
+        if i == 'q0':
+            net.add_node(i, label=i, color='#3cb371', shape='circle')
+        else:
+            net.add_node(i, label=i, shape='circle')
 
     for key in edges:
         for edge in edges[key]:

@@ -4,6 +4,7 @@ from draw3 import draw
 
 END_STATE = 'q0'
 START_STATE = 'q1'
+LAMBDA = 'λ'
 
 @dataclass
 class Transit:
@@ -32,7 +33,7 @@ class State:
 class Tape:
     def __init__(self, tape_str: str, table: list[list[list[str, bool]]], index: int) -> None:
         tape = list(map(str, tape_str))
-        tape = ['a', ] + tape + ['a', ]
+        tape = [LAMBDA, ] + tape + [LAMBDA, ]
         self.command_symbols = [i[0] for i in table[0][1:]]
         rows = table[1:]
         commands = dict()
@@ -74,7 +75,7 @@ class Tape:
                             symbol_to_replace = info[0]
                     # endregion частичное задание
 
-                    if delta.isdigit():
+                    if isinstance(delta, int) or delta.isdigit():
                         delta = int(delta)
                     else:
                         if delta == 'R':
@@ -107,12 +108,13 @@ class Tape:
         self.state.command = next_command
         self.state.tape[self.state.index] = replace
         if self.state.index == 0 and delta == -1:
-            self.state.tape = ['a', ] + self.state.tape
+            self.state.tape = [LAMBDA, ] + self.state.tape
         elif self.state.index == len(self.state.tape) - 1 and delta == 1:
-            self.state.tape = self.state.tape + ['a', ]
+            self.state.tape = self.state.tape + [LAMBDA, ]
             self.state.index += 1
         elif self.state.index == len(self.state.tape) - 1:
-            self.state.tape = self.state.tape + ['a', ]
+            self.state.tape = self.state.tape + [LAMBDA, ]
+            self.state.index += delta
         else:
             self.state.index += delta
         self.state.arrow = ' ' * self.state.index + '↓'

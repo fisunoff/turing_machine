@@ -4,7 +4,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import *
 
-from calc import Tape
+from calc import Tape, LAMBDA, START_STATE
 
 
 class TableModel(QAbstractTableModel):
@@ -16,6 +16,8 @@ class TableModel(QAbstractTableModel):
 
         self.commands = [[['', False] for j in range(self.WEIGHT)] for i in range(self.HEIGHT)]
         self.commands[0][0] = ['Символ', False]
+        self.commands[0][1] = [LAMBDA, False]
+        self.commands[1][0] = [START_STATE, False]
 
     def rowCount(self, parent=None, *args, **kwargs):
         return len(self.commands)
@@ -121,23 +123,40 @@ class MainWindow(QMainWindow):
 
     def show_message(self, message: str):
         dlg = QDialog(self)
-        dlg.setWindowTitle(message)
+        dlg.setWindowTitle("Ошибка")
+        layout = QVBoxLayout()
+        message_elem = QLabel(message)
+        layout.addWidget(message_elem)
+        dlg.setLayout(layout)
         dlg.exec()
 
     @pyqtSlot()
     def on_click(self):
         textboxValue = self.textbox.text()
+        index = self.textbox_index.text()
+        if not index:
+            self.show_message("Не задано начальное положение")
+            return
         index = int(self.textbox_index.text())
-        self.tape_cls = Tape(textboxValue, self.model.commands, index)
-        self.tape.setText(''.join(self.tape_cls.state.tape))
-        self.arrow.setText(self.tape_cls.state.arrow)
+        try:
+            self.tape_cls = Tape(textboxValue, self.model.commands, index)
+            self.tape.setText(''.join(self.tape_cls.state.tape))
+            self.arrow.setText(self.tape_cls.state.arrow)
+        except Exception as e:
+            self.show_message(str(e))
+
 
     @pyqtSlot()
     def next_position(self):
         if self.tape_cls:
-            ans = self.tape_cls.next()
-            self.tape.setText(''.join(self.tape_cls.state.tape))
-            self.arrow.setText(ans.arrow)
+            try:
+                ans = self.tape_cls.next()
+                self.tape.setText(''.join(self.tape_cls.state.tape))
+                self.arrow.setText(ans.arrow)
+            except NotImplementedError:
+                self.show_message("Неправильно задана функция")
+            except Exception as e:
+                self.show_message(str(e))
 
     @pyqtSlot()
     def go_to_end(self):
