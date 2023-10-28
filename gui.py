@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
 
     def make_export(self, filename: str):
         try:
-            with open(f"{filename}", "w") as f:
+            with open(f"{filename}", "w", encoding="utf-8") as f:
                 for row in self.model.commands:
                     f.write(";".join((i[0] for i in row)) + "\n")
         except Exception as e:
@@ -183,10 +183,11 @@ class MainWindow(QMainWindow):
     def make_import(self, filename: str):
         commands = copy.deepcopy(self.model.commands)
         try:
-            with open(f"{filename}") as f:
+            with open(f"{filename}", encoding="utf-8") as f:
                 for row_index in range(self.model.HEIGHT):
                     row = f.readline().split(';')
-                    for elem_index in range(self.model.WEIGHT):
+                    r = min(self.model.WEIGHT, len(row))
+                    for elem_index in range(r):
                         commands[row_index][elem_index][0] = row[elem_index].strip()
         except Exception as e:
             self.show_message(f"Ошибка при импорте: {e}")
