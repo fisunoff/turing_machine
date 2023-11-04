@@ -6,6 +6,7 @@ END_STATE = 'q0'
 START_STATE = 'q1'
 LAMBDA = 'λ'
 
+
 @dataclass
 class Transit:
     next_command: str
@@ -117,7 +118,7 @@ class Tape:
             self.state.index += delta
         else:
             self.state.index += delta
-        self.state.arrow = ' ' * self.state.index + '↓'
+        self.state.arrow = f"<html><head/><body><p>{'&nbsp;' * self.state.index + '↓'}<span style=\" vertical-align:super;\">{self.state.command}</span></p></body></html>"
         return self.state
 
     def draw_graph(self):

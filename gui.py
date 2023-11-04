@@ -51,13 +51,13 @@ class TableModel(QAbstractTableModel):
 
 class MainWindow(QMainWindow):
     tape_cls = None
+    delta = 50
 
     def __init__(self):
         super().__init__()
 
         self.model = TableModel()
         self.table = QTableView()
-        # self.table.verticalHeader().hide()
         self.table.setAlternatingRowColors(True)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setModel(self.model)
@@ -68,56 +68,56 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.table, 0, 0)
 
         self.label_index = QLabel(self)
-        self.label_index.move(20, 410)
+        self.label_index.move(20, 410 + self.delta)
         self.label_index.resize(280, 30)
         self.label_index.setText('Стартовая позиция')
 
         self.textbox_index = QLineEdit(self)
-        self.textbox_index.move(200, 410)
+        self.textbox_index.move(200, 410 + self.delta)
         self.textbox_index.resize(280, 30)
 
         self.label_tape = QLabel(self)
-        self.label_tape.move(20, 450)
+        self.label_tape.move(20, 450 + self.delta)
         self.label_tape.resize(280, 30)
         self.label_tape.setText('Запись')
 
         self.textbox = QLineEdit(self)
-        self.textbox.move(200, 450)
+        self.textbox.move(200, 450 + self.delta)
         self.textbox.resize(280, 30)
 
         self.button_install = QPushButton('Установить', self)
-        self.button_install.move(500, 450)
+        self.button_install.move(500, 450 + self.delta)
         self.button_install.clicked.connect(self.on_click)
 
         self.button_next = QPushButton('Сделать шаг', self)
-        self.button_next.move(600, 450)
+        self.button_next.move(600, 450 + self.delta)
         self.button_next.clicked.connect(self.next_position)
 
         self.button_auto = QPushButton('Автоматически', self)
-        self.button_auto.move(700, 450)
+        self.button_auto.move(700, 450 + self.delta)
         self.button_auto.clicked.connect(self.go_to_end)
 
         self.button_auto = QPushButton('Диаграмма', self)
-        self.button_auto.move(800, 450)
+        self.button_auto.move(800, 450 + self.delta)
         self.button_auto.clicked.connect(self.make_graph)
 
         self.button_export = QPushButton('Экспорт', self)
-        self.button_export.move(900, 450)
+        self.button_export.move(900, 450 + self.delta)
         self.button_export.clicked.connect(self.show_export_dialog)
 
         self.button_import = QPushButton('Импорт', self)
-        self.button_import.move(1000, 450)
+        self.button_import.move(1000, 450 + self.delta)
         self.button_import.clicked.connect(self.show_import_dialog)
 
         self.arrow = QLabel(self)
-        self.arrow.move(500, 395)
-        self.arrow.resize(600, 30)
+        self.arrow.move(500, 395 + self.delta)
+        self.arrow.resize(1000, 30)
         self.arrow.setText('Указатель')
         self.arrow.setFont(QFont('Consolas', 24))
 
         self.tape = QLabel(self)
-        self.tape.move(500, 420)
-        self.tape.resize(600, 30)
+        self.tape.move(500, 420 + self.delta)
+        self.tape.resize(1000, 30)
         self.tape.setText('Строка')
         self.tape.setFont(QFont('Consolas', 24))
 
@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mw = MainWindow()
-    mw.resize(1120, 500)
+    mw.resize(1120, 500 + mw.delta)
     mw.setWindowTitle('Машина Тьюринга')
     mw.show()
     sys.exit(app.exec_())
